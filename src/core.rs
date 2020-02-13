@@ -1,4 +1,4 @@
-use crate::util::{bare_name, function_exists, get_env_var, opt_env_var, dir_name};
+use crate::util::{bare_name, function_exists, get_env_var, opt_env_var};
 use aws_lambda_events::event::s3::S3Event;
 use lambda_runtime::{Context, error::HandlerError};
 use rusoto_core::{Region, credential::EnvironmentProvider, HttpClient};
@@ -53,20 +53,14 @@ pub async fn handler(ev: S3Event, _c: Context) -> Result<String, HandlerError> {
                 continue
             }
         };
-        // Whether or not the file is in the directory we're interested in. Defaults to true if we're interested in all of them.
-        let is_in_dir = match &monitored_dir {
-            Some(dir) => &dir_name(&key) == dir,
-            _ => true
-        };
         // Whether or not the file is named correctly. If no names were specified, all .ZIP files are allowed.
-        let is_named = match bare_name(&key) {
+        let update = match bare_name(&key) {
             None => false,
             Some(name) => match &monitored_names {
                 None => true,
                 Some(names) => names.contains(&name)
             }
         };
-        let update = is_in_dir && is_named;
         if update {
             info!("The file matches the criteria and is a candidate for a function update.");
             let name = &bare_name(&key).unwrap();
