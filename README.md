@@ -1,4 +1,5 @@
 # rust-lambda-cd
+![Build status](https://travis-ci.org/oreganoli/rust-lambda-cd.svg?branch=master)
 A simple Lambda updater in Rust, shamelessly aped from [an AWS tutorial](https://aws.amazon.com/blogs/compute/new-deployment-options-for-aws-lambda/).
 ## Usage
 Set up your CI/CD service so that for an AWS Lambda function named *function_X*, a file `function_X.zip` containing its code is uploaded to an S3 bucket.
