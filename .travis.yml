@@ -1,14 +1,14 @@
-language: rust
-cache: cargo
-script:
-  - cargo build --verbose --release --target x86_64-unknown-linux-musl
-  - cargo test --verbose --target x86_64-unknown-linux-musl
+language: generic
+sudo: required
+install: docker pull clux/muslrust
+script: docker run -v $PWD:/volume --rm -t clux/muslrust cargo build --release --verbose
 before_deploy:
   - mkdir deployment
-  - mv ./target/x86_64-unknown-linux-musl/release/bootstrap ./deployment/bootstrap
+  - sudo chown $USER ./target/x86_64-unknown-linux-musl/release/bootstrap
+  - sudo mv ./target/x86_64-unknown-linux-musl/release/bootstrap ./deployment/bootstrap
   - cd deployment
-  - zip rust-lambda-cd bootstrap
-  - rm bootstrap
+  - sudo zip rust-lambda-cd bootstrap
+  - sudo rm bootstrap
   - cd ..
 deploy:
   skip_cleanup: true
