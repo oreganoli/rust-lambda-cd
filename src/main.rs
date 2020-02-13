@@ -1,4 +1,6 @@
 #![feature(str_strip)]
+#[macro_use]
+extern crate log;
 use rusoto_lambda::{LambdaClient, GetFunctionRequest, GetFunctionError, GetFunctionResponse, Lambda};
 use rusoto_core::{HttpClient, RusotoError, credential::{EnvironmentProvider, ProvideAwsCredentials}, Region};
 use std::convert::TryFrom;
@@ -37,25 +39,30 @@ async fn handler() -> Result<(), ()> {
     // Which bucket to watch. Mandatory.
     let bucket = match std::env::var("BUCKET") {
         Ok(s) => s,
-        Err(_) => return Err(())
+        Err(_) => {
+            error!("A BUCKET environment variable must be provided.");
+            return Err(())}
     };
     // AWS region. Also mandatory.
     let region = match std::env::var("AWS_REGION") {
         Ok(s) => match Region::from_str(&s) {
             Ok(reg) => reg,
             Err(_) => {
-                eprintln!("Could not parse the given AWS region.");
+                error!("Could not parse the given AWS region.");
                 return Err(())
             }
         },
-        Err(_) => return Err(())
+        Err(_) => {
+            error!("The AWS_REGION environment variable must be provided.");
+            return Err(())
+        }
     };
     // Which functions to auto-update. If not provided, will try to update every .zip matching the name of a function.
     let monitored_names = std::env::var("FUNCTION_NAMES").ok();
     // Which folder to watch for changes in. If not provided, all new .zips will be checked.
     let monitored_folder = std::env::var("DIRECTORY").ok();
     if monitored_names.is_none() && monitored_folder.is_none() {
-        eprintln!("You must provide at least one of FUNCTION_NAMES and DIRECTORY.");
+        error!("You must provide at least one of FUNCTION_NAMES and DIRECTORY.");
         return Err(())
     }
     let lambda_client = LambdaClient::new_with(
@@ -66,6 +73,7 @@ async fn handler() -> Result<(), ()> {
     Ok(())
 }
 fn main() {
+    pretty_env_logger::init();
     let result = handler();
     dbg!(result);
 }
