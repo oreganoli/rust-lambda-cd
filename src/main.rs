@@ -57,7 +57,11 @@ async fn handler() -> Result<(), ()> {
             return Err(())
         }
     };
-    // Which functions to auto-update, separated by a comma. If not provided, will try to update every .zip matching the name of a function.
+    /*
+     Which functions to auto-update, separated by a comma.
+     If not provided, will try to update every .zip matching the name of an existent function
+     in the chosen directory.
+     */
     let monitored_names: Option<Vec<String>> = std::env::var("FUNCTION_NAMES").ok().map(|s|
         s
             .split(":")
@@ -72,9 +76,9 @@ async fn handler() -> Result<(), ()> {
         }
         Some(())
     });
-    // Which folder to watch for changes in. If not provided, all new .zips will be checked.
-    let monitored_folder = std::env::var("DIRECTORY").ok();
-    if monitored_names.is_none() && monitored_folder.is_none() {
+    // Which directory to watch for changes in. If not provided, all new .zips in the bucket matching monitored_names will be checked for.
+    let monitored_dir = std::env::var("DIRECTORY").ok();
+    if monitored_names.is_none() && monitored_dir.is_none() {
         error!("You must provide at least one of FUNCTION_NAMES and DIRECTORY.");
         return Err(())
     }
