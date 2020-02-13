@@ -3,10 +3,9 @@
 extern crate log;
 mod core;
 mod util;
-use core::handler;
-
+use crate::core::handler;
+use lambda_runtime::lambda;
 fn main() {
     pretty_env_logger::init();
-    let result = handler();
-    dbg!(result);
+    lambda!(handler)
 }

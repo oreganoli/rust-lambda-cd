@@ -1,6 +1,7 @@
 use rusoto_lambda::{LambdaClient, GetFunctionError, GetFunctionRequest, Lambda};
 use rusoto_core::RusotoError;
 use std::env::var;
+use lambda_runtime::error::HandlerError;
 
 mod test;
 /// Extracts the name of the Lambda function being updated from the code zip's full path and filename.
@@ -21,7 +22,7 @@ pub fn dir_name(path: &str) -> String {
     segments.join("/")
 }
 
-pub async fn function_exists(name: &str, client: &LambdaClient) -> Result<bool, RusotoError<GetFunctionError>> {
+pub async fn function_exists(name: &str, client: &LambdaClient) -> Result<bool, HandlerError> {
     let mut request = GetFunctionRequest::default();
     request.function_name = name.to_owned();
     let response = client.get_function(request).await;
@@ -31,20 +32,20 @@ pub async fn function_exists(name: &str, client: &LambdaClient) -> Result<bool, 
             match &e {
                 RusotoError::Service(ser) => match ser {
                     GetFunctionError::ResourceNotFound(_) => Ok(false),
-                    _ => Err(e)
+                    _ => Err(HandlerError::from("Function existence check failed."))
                 },
-                _ => Err(e)
+                _ => Err(HandlerError::from("Function existence check failed."))
             }
         }
     }
 }
 /// Gets the given environment variable or displays an error and returns one.
-pub fn get_env_var(key: &str) -> Result<String, ()> {
+pub fn get_env_var(key: &str) -> Result<String, HandlerError> {
     match var(key) {
         Ok(s) => Ok(s),
         Err(_) => {
             error!("The {} environment variable must be set.", key);
-            Err(())
+            Err(HandlerError::from(format!("{} environment variable not set", key).as_str()))
         }
     }
 }
