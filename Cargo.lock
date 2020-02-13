@@ -1280,6 +1280,7 @@ dependencies = [
  "lambda_runtime",
  "rusoto_core",
  "rusoto_lambda",
+ "tokio 0.2.11",
 ]
 
 [[package]]
