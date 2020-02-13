@@ -7,3 +7,11 @@ fn test_filename_extraction() {
     assert_eq!(None, bare_name("Docs/not_a_zip.xls"));
     assert_eq!(None, bare_name("also not a zip"));
 }
+
+#[test]
+fn test_path_extraction() {
+    use super::dir_name;
+    assert_eq!("", dir_name("top-level file.png"));
+    assert_eq!("dir", dir_name("/dir/file.tar.gz"));
+    assert_eq!("tsu/util", dir_name("tsu/util/video.webm"));
+}

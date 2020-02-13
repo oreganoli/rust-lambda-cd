@@ -6,10 +6,19 @@ mod test;
 /// Extracts the name of the Lambda function being updated from the code zip's full path and filename.
 pub fn bare_name(path: &str) -> Option<String> {
     // explicit type needed here because CLion can't handle Splits
-    let x: Option<&str> = path.split("/").into_iter().last();
+    let x: Option<&str> = path.split('/').into_iter().last();
     x
         .and_then(|s| s.strip_suffix(".zip"))
         .map(|s| s.to_owned())
+}
+/// Extracts a directory path from a full S3 path.
+pub fn dir_name(path: &str) -> String {
+    let mut segments = path
+        .split('/')
+        .filter(|x| !x.is_empty())
+        .collect::<Vec<&str>>();
+    let _ = segments.pop();
+    segments.join("/")
 }
 
 pub async fn function_exists(name: &str, client: &LambdaClient) -> Result<bool, RusotoError<GetFunctionError>> {
