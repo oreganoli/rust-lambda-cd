@@ -35,13 +35,6 @@ pub async fn handler(ev: S3Event, _c: Context) -> Result<String, HandlerError> {
         }
         Some(())
     });
-    // Which directory to watch for changes in. If not provided, all new .zips in the bucket matching monitored_names will be checked for.
-    let monitored_dir = opt_env_var("DIRECTORY");
-    // Either of the above must be present.
-    if monitored_names.is_none() && monitored_dir.is_none() {
-        error!("You must provide at least one of FUNCTION_NAMES and DIRECTORY.");
-        return Err(HandlerError::from("Neither function names nor source directory given."))
-    }
 
     let lambda_client = LambdaClient::new_with(
         HttpClient::new().unwrap(),

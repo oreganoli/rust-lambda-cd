@@ -12,16 +12,6 @@ pub fn bare_name(path: &str) -> Option<String> {
         .and_then(|s| s.strip_suffix(".zip"))
         .map(|s| s.to_owned())
 }
-/// Extracts a directory path from a full S3 path.
-pub fn dir_name(path: &str) -> String {
-    let mut segments = path
-        .split('/')
-        .filter(|x| !x.is_empty())
-        .collect::<Vec<&str>>();
-    let _ = segments.pop();
-    segments.join("/")
-}
-
 pub async fn function_exists(name: &str, client: &LambdaClient) -> Result<bool, HandlerError> {
     let mut request = GetFunctionRequest::default();
     request.function_name = name.to_owned();
