@@ -14,3 +14,7 @@ rusoto_lambda = {version = "0.43.0-beta.1", default-features = false, features =
 tokio = "0.2.11"
 log = "0.4.8"
 pretty_env_logger = "0.4.0"
+
+[[bin]]
+name = "bootstrap"
+path = "src/main.rs"
