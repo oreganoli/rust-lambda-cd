@@ -1,5 +1,6 @@
 use rusoto_lambda::{LambdaClient, GetFunctionError, GetFunctionRequest, Lambda};
 use rusoto_core::RusotoError;
+use std::env::var;
 
 mod test;
 /// Extracts the name of the Lambda function being updated from the code zip's full path and filename.
@@ -27,4 +28,18 @@ pub async fn function_exists(name: &str, client: &LambdaClient) -> Result<bool, 
             }
         }
     }
+}
+/// Gets the given environment variable or displays an error and returns one.
+pub fn get_env_var(key: &str) -> Result<String, ()> {
+    match var(key) {
+        Ok(s) => Ok(s),
+        Err(_) => {
+            error!("The {} environment variable must be set.", key);
+            Err(())
+        }
+    }
+}
+/// Gets the given environment variable if it exists, otherwise returns `None`.
+pub fn opt_env_var(key: &str) -> Option<String> {
+    var(key).ok()
 }

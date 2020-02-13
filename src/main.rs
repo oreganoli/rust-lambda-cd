@@ -7,28 +7,18 @@ use std::convert::TryFrom;
 use std::str::FromStr;
 
 mod util;
+use util::{bare_name, get_env_var, opt_env_var};
 
 
 #[tokio::main]
 async fn handler() -> Result<(), ()> {
     // Which bucket to watch. Mandatory.
-    let bucket = match std::env::var("BUCKET") {
-        Ok(s) => s,
-        Err(_) => {
-            error!("A BUCKET environment variable must be provided.");
-            return Err(())}
-    };
+    let bucket = get_env_var("BUCKET")?;
     // AWS region. Also mandatory.
-    let region = match std::env::var("AWS_REGION") {
-        Ok(s) => match Region::from_str(&s) {
-            Ok(reg) => reg,
-            Err(_) => {
-                error!("Could not parse the given AWS region.");
-                return Err(())
-            }
-        },
+    let region = match Region::from_str(&get_env_var("AWS_REGION")?) {
+        Ok(reg) => reg,
         Err(_) => {
-            error!("The AWS_REGION environment variable must be provided.");
+            error!("Could not parse the given AWS region.");
             return Err(())
         }
     };
@@ -37,7 +27,7 @@ async fn handler() -> Result<(), ()> {
      If not provided, will try to update every .zip matching the name of an existent function
      in the chosen directory.
      */
-    let monitored_names: Option<Vec<String>> = std::env::var("FUNCTION_NAMES").ok().map(|s|
+    let monitored_names: Option<Vec<String>> = opt_env_var("FUNCTION_NAMES").map(|s|
         s
             .split(":")
             .into_iter()
@@ -52,7 +42,7 @@ async fn handler() -> Result<(), ()> {
         Some(())
     });
     // Which directory to watch for changes in. If not provided, all new .zips in the bucket matching monitored_names will be checked for.
-    let monitored_dir = std::env::var("DIRECTORY").ok();
+    let monitored_dir = opt_env_var("DIRECTORY");
     if monitored_names.is_none() && monitored_dir.is_none() {
         error!("You must provide at least one of FUNCTION_NAMES and DIRECTORY.");
         return Err(())
