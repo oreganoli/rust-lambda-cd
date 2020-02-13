@@ -32,7 +32,7 @@ async fn function_exists(name: &str, client: &LambdaClient) -> Result<bool, Ruso
         }
     }
 }
-
+#[tokio::main]
 async fn handler() -> Result<(), ()> {
     // Which bucket to watch. Mandatory.
     let bucket = match std::env::var("BUCKET") {
@@ -54,18 +54,18 @@ async fn handler() -> Result<(), ()> {
     let monitored_names = std::env::var("FUNCTION_NAMES").ok();
     // Which folder to watch for changes in. If not provided, all new .zips will be checked.
     let monitored_folder = std::env::var("DIRECTORY").ok();
-    Ok(())
-}
-
-fn sync_wrapper(lambda_result: Result<(), ()>) -> Result<(), ()> {
-    lambda_result
-}
-
-#[tokio::main]
-async fn main() {
+    if monitored_names.is_none() && monitored_folder.is_none() {
+        eprintln!("You must provide at least one of FUNCTION_NAMES and DIRECTORY.");
+        return Err(())
+    }
     let lambda_client = LambdaClient::new_with(
         HttpClient::new().unwrap(),
         EnvironmentProvider::default(),
-        Region::EuCentral1
+        region
     );
+    Ok(())
+}
+fn main() {
+    let result = handler();
+    dbg!(result);
 }
